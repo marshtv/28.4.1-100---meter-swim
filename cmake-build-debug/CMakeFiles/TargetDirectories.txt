@@ -1,0 +1,3 @@
+F:/__C++/Skillbox/28 Multithreading/28.4.1 100 - meter swim/cmake-build-debug/CMakeFiles/28_4_1_100___meter_swim.dir
+F:/__C++/Skillbox/28 Multithreading/28.4.1 100 - meter swim/cmake-build-debug/CMakeFiles/edit_cache.dir
+F:/__C++/Skillbox/28 Multithreading/28.4.1 100 - meter swim/cmake-build-debug/CMakeFiles/rebuild_cache.dir
