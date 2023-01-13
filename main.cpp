@@ -140,34 +140,39 @@ void startSwim(SwimTrack* track) {
 	swimScoreboard[track->getCount()].swimmedLength = 0;
 	while (!swimScoreboard[track->getCount()].bIsFinished) {
 		swimScoreboard_mutex.unlock();
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds (100));
+
 		swimScoreboard_mutex.lock();
-		swimScoreboard[track->getCount()].swimmedLength += track->getSwimmer()->getSpeed();
-		if (swimScoreboard[track->getCount()].swimmedLength >= track->getLength()) {
+		swimScoreboard[track->getCount()].swimmedLength += (track->getSwimmer()->getSpeed()) / 10;
+
+		if ((track->getLength() - swimScoreboard[track->getCount()].swimmedLength)
+						< 0) { //std::numeric_limits<double>::epsilon()
 			swimScoreboard[track->getCount()].bIsFinished = true;
-			std::cout << swimScoreboard[track->getCount()].name << " FINISHED." << std::endl;
+
 			tracksWinList_mutex.lock();
 			tracksWinList.push_back(swimScoreboard[track->getCount()]);
 			tracksWinList_mutex.unlock();
-		} else
-			swimScoreboard[track->getCount()].bIsFinished = false;
+		}
 	}
 	swimScoreboard_mutex.unlock();
 }
 
+void onlineTablo() {
+
+}
+
 int main() {
-	std::cout << "Input swimming tracks number and track's length:";
-	int in_tracksNum;
+	std::cout << "Input swimming track's length:";
 	double in_length;
-	std::cin >> in_tracksNum >> in_length;
-	auto* pool = new Pool(in_tracksNum, in_length);
+	std::cin >> in_length;
+	auto* pool = new Pool(6, in_length);
 
 	std::cout << "-------------------------------------------------" << std::endl;
-	std::cout << "list:" << std::endl;
+	std::cout << "Swimmer's List:" << std::endl;
 	std::cout << "-------------------------------------------------" << std::endl;
 
 	for (int i = 0; i < pool->getTracksNum(); ++i) {
-		std::cout << "Track #" << pool->getTrackByCount(i)->getCount() << " "
+		std::cout << "Track " << pool->getTrackByCount(i)->getCount() << " "
 					<< pool->getTrackByCount(i)->getSwimmer()->getName() << " "
 					<< "speed: " << pool->getTrackByCount(i)->getSwimmer()->getSpeed() << std::endl;
 	}
@@ -188,24 +193,58 @@ int main() {
 			break;
 		}
 	}
-	std::cout << "------------------------------------" << std::endl;
+	std::cout << "-------------------------------------------------" << std::endl;
 
-	for (int i = 0; i < pool->getTracksNum(); ++i) {
-		std::thread start(startSwim, pool->getTrackByCount(i));
-		start.detach();
-		//if (start.joinable()) start.join();
-		start.join();
+	std::thread start0(startSwim, pool->getTrackByCount(0));
+
+	std::thread start1(startSwim, pool->getTrackByCount(1));
+
+	std::thread start2(startSwim, pool->getTrackByCount(2));
+
+	std::thread start3(startSwim, pool->getTrackByCount(3));
+
+	std::thread start4(startSwim, pool->getTrackByCount(4));
+
+	std::thread start5(startSwim, pool->getTrackByCount(5));
+
+	bool bIsAll_Finished = false;
+	while (!bIsAll_Finished) {
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		for (int j = 0; j < swimScoreboard.size(); ++j) {
+			std::cout << swimScoreboard[j].name << "\t";
+		}
+		std::cout << std::endl;
+		for (int j = 0; j < swimScoreboard.size(); ++j) {
+			std::cout << swimScoreboard[j].swimmedLength << "\t";
+		}
+		std::cout << std::endl;
+
+		for (int j = 0; j < swimScoreboard.size(); ++j) {
+			if (!swimScoreboard[j].bIsFinished) break;
+			bIsAll_Finished = true;
+		}
+		std::cout << "-------------------------------------------------" << std::endl;
 	}
 
+	start0.join();
+	start1.join();
+	start2.join();
+	start3.join();
+	start4.join();
+	start5.join();
+
 	std::cout << "Winner's Scoreboard:" << std::endl;
-	std::cout << "------------------------------------" << std::endl;
+	std::cout << "-------------------------------------------------" << std::endl;
+	//std::cout << "swimmers finished = " << tracksWinList.size() << std::endl;
+	//std::cout << "-------------------------------------------------" << std::endl;
 	for (int i = 0; i < tracksWinList.size(); ++i) {
 		std::cout 	<< i + 1 << ". "
 					<< pool->getTrackByCount(tracksWinList[i].trackNum)->getSwimmer()->getName()
-					<< ", Time: "
-					<< pool->getTrackByCount(tracksWinList[i].trackNum)->getFinishSeconds() << std::endl;
+					<< ",\tTime\t: "
+					<< pool->getTrackByCount(tracksWinList[i].trackNum)->getFinishSeconds()
+					<< "sec." << std::endl;
 	}
-	std::cout << "------------------------------------" << std::endl;
+	std::cout << "-------------------------------------------------" << std::endl;
 	std::cout << "Exit program. Good by." << std::endl;
 
 	return 0;
