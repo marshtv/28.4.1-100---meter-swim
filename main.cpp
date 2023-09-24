@@ -12,6 +12,7 @@ private:
 	double speed = 1.0;
 public:
 	Swimmer(std::string in_name, double in_speed) {
+		this->name.resize(in_name.size());
 		this->name = in_name;
 		assert(in_speed >= 0);
 		this->speed = in_speed;
