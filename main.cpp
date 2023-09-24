@@ -18,6 +18,11 @@ public:
 		this->speed = in_speed;
 	}
 
+	Swimmer(const Swimmer &other) {
+		this->name = other.name;
+		this->speed = other.speed;
+	}
+
 	std::string getName() {
 		return this->name;
 	}
